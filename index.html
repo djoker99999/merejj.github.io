@@ -685,6 +685,144 @@
       color: #ffd700;
     }
 
+    .drop-pool-container {
+      margin: 15px 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 15px;
+      backdrop-filter: blur(5px);
+    }
+
+    .drop-pool-container h3 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    .drop-pool-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .drop-pool-bar {
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .drop-pool-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ffed4a);
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .drop-pool-rewards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .drop-reward-item {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+      min-width: 120px;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .drop-reward-item h4 {
+      font-size: 1em;
+      margin-bottom: 5px;
+      color: #ffd700;
+    }
+
+    .drop-reward-item p {
+      font-size: 0.9em;
+      color: #fff;
+    }
+
+    .drop-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .drop-popup-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .drop-popup-content {
+      background: linear-gradient(135deg, rgba(184, 134, 11, 0.95), rgba(218, 165, 32, 0.95));
+      padding: 25px;
+      border-radius: 20px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      transform: scale(0.7);
+      transition: transform 0.4s ease;
+      position: relative;
+    }
+
+    .drop-popup-overlay.active .drop-popup-content {
+      transform: scale(1);
+    }
+
+    .drop-popup-content h3 {
+      font-size: 1.8em;
+      margin-bottom: 15px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .drop-popup-reward {
+      font-size: 1.5em;
+      margin: 15px 0;
+      color: #ffed4a;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    }
+
+    .drop-popup-close-btn {
+      padding: 10px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(45deg, #b8860b, #daa520);
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .drop-popup-close-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(45deg, #daa520, #ffd700);
+    }
+
     @media (min-width: 768px) {
       .game-container {
         padding: 30px;
@@ -809,6 +947,35 @@
       <p>Choisissez un niveau et accumulez des tickets pour participer au tirage !</p>
     </div>
 
+    <div class="drop-pool-container">
+      <h3>🎁 Pool de Drop</h3>
+      <div class="drop-pool-info">
+        <span>Récompense actuelle: <span id="dropPoolAmount">0</span> pièces</span>
+        <span>Prochain drop: <span id="nextDropChance">0.2%</span></span>
+      </div>
+      <div class="drop-pool-bar">
+        <div class="drop-pool-fill" id="dropPoolFill" style="width: 0%"></div>
+      </div>
+      <div class="drop-pool-rewards">
+        <div class="drop-reward-item">
+          <h4>Drop Commun</h4>
+          <p>5-20 pièces</p>
+        </div>
+        <div class="drop-reward-item">
+          <h4>Drop Rare</h4>
+          <p>20-50 pièces</p>
+        </div>
+        <div class="drop-reward-item">
+          <h4>Drop Épique</h4>
+          <p>50-100 pièces</p>
+        </div>
+        <div class="drop-reward-item">
+          <h4>Drop Légendaire</h4>
+          <p>100-200 pièces</p>
+        </div>
+      </div>
+    </div>
+
     <div class="ticket-modes-container">
       <div class="ticket-modes-scroll">
         <div class="ticket-mode-image">
@@ -882,6 +1049,15 @@
     </div>
   </div>
 
+  <div class="drop-popup-overlay" id="dropPopup">
+    <div class="drop-popup-content">
+      <h3>🎁 RÉCOMPENSE DE DROP !</h3>
+      <div id="dropPopupReward" class="drop-popup-reward"></div>
+      <p id="dropPopupMessage"></p>
+      <button class="drop-popup-close-btn" id="closeDropPopupBtn">Fermer</button>
+    </div>
+  </div>
+
   <div class="hack-animation" id="hackAnimation">
     <div class="hack-animation-content" id="hackAnimationContent"></div>
     <div class="hack-message" id="hackMessage">PIRATAGE EN COURS...</div>
@@ -896,6 +1072,19 @@
       { id: 4, reward: 5000, ticketsNeeded: 30000 }
     ];
     
+    // Système de drop pool
+    const dropPool = {
+      currentAmount: 0,
+      ticketsSinceLastDrop: 0,
+      dropChance: 0.002, // 0.2% de chance par ticket
+      dropTypes: [
+        { name: "Commun", min: 5, max: 20, chance: 0.6 },
+        { name: "Rare", min: 20, max: 50, chance: 0.25 },
+        { name: "Épique", min: 50, max: 100, chance: 0.1 },
+        { name: "Légendaire", min: 100, max: 200, chance: 0.05 }
+      ]
+    };
+    
     let currentLevel = 1;
     let totalTickets = 0;
     let participants = [];
@@ -906,8 +1095,10 @@
     let audioContext = null;
     let hitSoundBuffer = null;
     let rewardSoundBuffer = null;
+    let dropSoundBuffer = null;
     let isHitSoundPlaying = false;
     let isRewardSoundPlaying = false;
+    let isDropSoundPlaying = false;
 
     // URLs des animations de piratage
     const hackAnimations = [
@@ -936,9 +1127,18 @@
     const popupVictoryMessage = document.getElementById("popupVictoryMessage");
     const closePopupBtn = document.getElementById("closePopupBtn");
     
+    const dropPopup = document.getElementById("dropPopup");
+    const dropPopupReward = document.getElementById("dropPopupReward");
+    const dropPopupMessage = document.getElementById("dropPopupMessage");
+    const closeDropPopupBtn = document.getElementById("closeDropPopupBtn");
+    
     const hackAnimation = document.getElementById("hackAnimation");
     const hackAnimationContent = document.getElementById("hackAnimationContent");
     const hackMessage = document.getElementById("hackMessage");
+    
+    const dropPoolAmount = document.getElementById("dropPoolAmount");
+    const nextDropChance = document.getElementById("nextDropChance");
+    const dropPoolFill = document.getElementById("dropPoolFill");
 
     const impactEffects = ["💥", "🔥", "⭐", "💫", "✨", "💢"];
 
@@ -954,6 +1154,10 @@
         
         loadSound('https://files.catbox.moe/goq31j.mp3', function(buffer) {
           rewardSoundBuffer = buffer;
+        });
+        
+        loadSound('https://files.catbox.moe/73lkke.mp3', function(buffer) {
+          dropSoundBuffer = buffer;
         });
         
       } catch (e) {
@@ -1024,6 +1228,10 @@
 
     function playRewardSound() {
       playSound(rewardSoundBuffer, isRewardSoundPlaying);
+    }
+
+    function playDropSound() {
+      playSound(dropSoundBuffer, isDropSoundPlaying);
     }
 
     function createExplosionEffect() {
@@ -1177,6 +1385,23 @@
       }
     }
 
+    function updateDropPool() {
+      // Mettre à jour le pool de drop
+      const ticketsForPool = Math.floor(totalTickets / 100) * 2; // 2 pièces tous les 100 tickets
+      dropPool.currentAmount = ticketsForPool;
+      
+      // Mettre à jour l'affichage
+      dropPoolAmount.textContent = dropPool.currentAmount;
+      
+      // Calculer la chance de drop
+      const dropChance = Math.min(dropPool.dropChance * dropPool.ticketsSinceLastDrop * 100, 100);
+      nextDropChance.textContent = dropChance.toFixed(2) + '%';
+      
+      // Mettre à jour la barre de progression du drop
+      const dropProgress = Math.min((dropPool.ticketsSinceLastDrop / 500) * 100, 100);
+      dropPoolFill.style.width = dropProgress + '%';
+    }
+
     function updateParticipantsList() {
       participantsContainer.innerHTML = '';
       
@@ -1235,6 +1460,72 @@
       }, 5000);
     }
 
+    function checkForDrop(username, tickets) {
+      // Augmenter le compteur de tickets depuis le dernier drop
+      dropPool.ticketsSinceLastDrop += tickets;
+      
+      // Vérifier si un drop se produit
+      const dropProbability = dropPool.dropChance * tickets;
+      if (Math.random() < dropProbability) {
+        // Un drop se produit !
+        triggerDrop(username);
+        dropPool.ticketsSinceLastDrop = 0; // Réinitialiser le compteur
+      }
+      
+      // Mettre à jour l'affichage du pool de drop
+      updateDropPool();
+    }
+
+    function triggerDrop(username) {
+      // Déterminer le type de drop
+      const randomValue = Math.random();
+      let cumulativeChance = 0;
+      let dropType = null;
+      
+      for (const type of dropPool.dropTypes) {
+        cumulativeChance += type.chance;
+        if (randomValue <= cumulativeChance) {
+          dropType = type;
+          break;
+        }
+      }
+      
+      // Si aucun type n'a été sélectionné (erreur de calcul), prendre le premier
+      if (!dropType) {
+        dropType = dropPool.dropTypes[0];
+      }
+      
+      // Calculer le montant du drop
+      const dropAmount = Math.floor(Math.random() * (dropType.max - dropType.min + 1)) + dropType.min;
+      
+      // Afficher le popup de drop
+      showDropPopup(username, dropType.name, dropAmount);
+      
+      // Jouer le son de drop
+      playDropSound();
+      
+      // Effets visuels
+      createGoldShards();
+      createExplosionEffect();
+    }
+
+    function showDropPopup(username, dropType, dropAmount) {
+      dropPopupReward.textContent = `${dropAmount} pièces`;
+      dropPopupMessage.textContent = `${username} a obtenu un drop ${dropType} !`;
+      
+      dropPopup.style.display = 'flex';
+      setTimeout(() => {
+        dropPopup.classList.add('active');
+      }, 10);
+    }
+
+    function closeDropPopup() {
+      dropPopup.classList.remove('active');
+      setTimeout(() => {
+        dropPopup.style.display = 'none';
+      }, 300);
+    }
+
     function addTickets(username, tickets) {
       // Vérifier si l'utilisateur existe déjà
       const existingUserIndex = participants.findIndex(p => p.name.toLowerCase() === username.toLowerCase());
@@ -1252,6 +1543,9 @@
       
       // Mettre à jour le total de tickets
       totalTickets += tickets;
+      
+      // Vérifier si un drop se produit
+      checkForDrop(username, tickets);
       
       // Mettre à jour l'affichage
       updateTicketProgress();
@@ -1399,7 +1693,8 @@
       const gameData = {
         totalTickets: totalTickets,
         participants: participants,
-        currentLevel: currentLevel
+        currentLevel: currentLevel,
+        dropPool: dropPool
       };
       
       const dataStr = JSON.stringify(gameData, null, 2);
@@ -1435,10 +1730,15 @@
           if (importedData.currentLevel) {
             currentLevel = importedData.currentLevel;
           }
+          if (importedData.dropPool) {
+            dropPool.currentAmount = importedData.dropPool.currentAmount || 0;
+            dropPool.ticketsSinceLastDrop = importedData.dropPool.ticketsSinceLastDrop || 0;
+          }
           
           updateTicketProgress();
           updateParticipantsList();
           updateLevelDisplay();
+          updateDropPool();
           
           message.textContent = "Données importées avec succès !";
         } catch (error) {
@@ -1457,15 +1757,19 @@
       totalTickets = 0;
       participants = [];
       currentLevel = 1;
+      dropPool.currentAmount = 0;
+      dropPool.ticketsSinceLastDrop = 0;
       
       // Mettre à jour l'affichage
       updateTicketProgress();
       updateParticipantsList();
       updateLevelDisplay();
+      updateDropPool();
       
       message.textContent = "Nouveau tirage au sort ! Achetez des tickets pour participer !";
       
       closeVictoryPopup();
+      closeDropPopup();
       comboIndicator.style.display = "none";
     }
 
@@ -1485,10 +1789,17 @@
     });
 
     closePopupBtn.addEventListener('click', closeVictoryPopup);
+    closeDropPopupBtn.addEventListener('click', closeDropPopup);
 
     victoryPopup.addEventListener('click', function(e) {
       if (e.target === this) {
         closeVictoryPopup();
+      }
+    });
+
+    dropPopup.addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeDropPopup();
       }
     });
 
@@ -1500,6 +1811,7 @@
     updateTicketProgress();
     updateParticipantsList();
     updateLevelDisplay();
+    updateDropPool();
   </script>
 </body>
 </html>
