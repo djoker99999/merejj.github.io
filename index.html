@@ -699,27 +699,6 @@
       color: #ffd700;
     }
 
-    .drop-pool-info {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .drop-pool-bar {
-      height: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-
-    .drop-pool-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #ffd700, #ffed4a);
-      border-radius: 10px;
-      transition: width 0.5s ease;
-    }
-
     .drop-pool-rewards {
       display: flex;
       flex-wrap: wrap;
@@ -949,13 +928,6 @@
 
     <div class="drop-pool-container">
       <h3>🎁 Pool de Drop</h3>
-      <div class="drop-pool-info">
-        <span>Récompense actuelle: <span id="dropPoolAmount">0</span> pièces</span>
-        <span>Prochain drop: <span id="nextDropChance">0.2%</span></span>
-      </div>
-      <div class="drop-pool-bar">
-        <div class="drop-pool-fill" id="dropPoolFill" style="width: 0%"></div>
-      </div>
       <div class="drop-pool-rewards">
         <div class="drop-reward-item">
           <h4>Drop Commun</h4>
@@ -1072,10 +1044,8 @@
       { id: 4, reward: 5000, ticketsNeeded: 30000 }
     ];
     
-    // Système de drop pool
+    // Système de drop pool simplifié
     const dropPool = {
-      currentAmount: 0,
-      ticketsSinceLastDrop: 0,
       dropChance: 0.002, // 0.2% de chance par ticket
       dropTypes: [
         { name: "Commun", min: 5, max: 20, chance: 0.6 },
@@ -1135,10 +1105,6 @@
     const hackAnimation = document.getElementById("hackAnimation");
     const hackAnimationContent = document.getElementById("hackAnimationContent");
     const hackMessage = document.getElementById("hackMessage");
-    
-    const dropPoolAmount = document.getElementById("dropPoolAmount");
-    const nextDropChance = document.getElementById("nextDropChance");
-    const dropPoolFill = document.getElementById("dropPoolFill");
 
     const impactEffects = ["💥", "🔥", "⭐", "💫", "✨", "💢"];
 
@@ -1385,23 +1351,6 @@
       }
     }
 
-    function updateDropPool() {
-      // Mettre à jour le pool de drop
-      const ticketsForPool = Math.floor(totalTickets / 100) * 2; // 2 pièces tous les 100 tickets
-      dropPool.currentAmount = ticketsForPool;
-      
-      // Mettre à jour l'affichage
-      dropPoolAmount.textContent = dropPool.currentAmount;
-      
-      // Calculer la chance de drop
-      const dropChance = Math.min(dropPool.dropChance * dropPool.ticketsSinceLastDrop * 100, 100);
-      nextDropChance.textContent = dropChance.toFixed(2) + '%';
-      
-      // Mettre à jour la barre de progression du drop
-      const dropProgress = Math.min((dropPool.ticketsSinceLastDrop / 500) * 100, 100);
-      dropPoolFill.style.width = dropProgress + '%';
-    }
-
     function updateParticipantsList() {
       participantsContainer.innerHTML = '';
       
@@ -1461,19 +1410,12 @@
     }
 
     function checkForDrop(username, tickets) {
-      // Augmenter le compteur de tickets depuis le dernier drop
-      dropPool.ticketsSinceLastDrop += tickets;
-      
       // Vérifier si un drop se produit
       const dropProbability = dropPool.dropChance * tickets;
       if (Math.random() < dropProbability) {
         // Un drop se produit !
         triggerDrop(username);
-        dropPool.ticketsSinceLastDrop = 0; // Réinitialiser le compteur
       }
-      
-      // Mettre à jour l'affichage du pool de drop
-      updateDropPool();
     }
 
     function triggerDrop(username) {
@@ -1693,8 +1635,7 @@
       const gameData = {
         totalTickets: totalTickets,
         participants: participants,
-        currentLevel: currentLevel,
-        dropPool: dropPool
+        currentLevel: currentLevel
       };
       
       const dataStr = JSON.stringify(gameData, null, 2);
@@ -1730,15 +1671,10 @@
           if (importedData.currentLevel) {
             currentLevel = importedData.currentLevel;
           }
-          if (importedData.dropPool) {
-            dropPool.currentAmount = importedData.dropPool.currentAmount || 0;
-            dropPool.ticketsSinceLastDrop = importedData.dropPool.ticketsSinceLastDrop || 0;
-          }
           
           updateTicketProgress();
           updateParticipantsList();
           updateLevelDisplay();
-          updateDropPool();
           
           message.textContent = "Données importées avec succès !";
         } catch (error) {
@@ -1757,14 +1693,11 @@
       totalTickets = 0;
       participants = [];
       currentLevel = 1;
-      dropPool.currentAmount = 0;
-      dropPool.ticketsSinceLastDrop = 0;
       
       // Mettre à jour l'affichage
       updateTicketProgress();
       updateParticipantsList();
       updateLevelDisplay();
-      updateDropPool();
       
       message.textContent = "Nouveau tirage au sort ! Achetez des tickets pour participer !";
       
@@ -1811,7 +1744,6 @@
     updateTicketProgress();
     updateParticipantsList();
     updateLevelDisplay();
-    updateDropPool();
   </script>
 </body>
 </html>
