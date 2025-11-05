@@ -1044,7 +1044,7 @@
       { id: 4, reward: 5000, ticketsNeeded: 30000 }
     ];
     
-    // Système de drop pool simplifié
+    // Système de drop pool amélioré
     const dropPool = {
       dropChance: 0.002, // 0.2% de chance par ticket
       dropTypes: [
@@ -1052,7 +1052,12 @@
         { name: "Rare", min: 20, max: 50, chance: 0.25 },
         { name: "Épique", min: 50, max: 100, chance: 0.1 },
         { name: "Légendaire", min: 100, max: 200, chance: 0.05 }
-      ]
+      ],
+      // Système de remplissage du pool
+      poolFillRate: 5, // 5 pièces ajoutées au pool tous les 100 tickets
+      poolFillInterval: 100, // Tous les 100 tickets
+      currentPool: 0, // Pool actuel de pièces disponibles
+      totalTicketsForPool: 0 // Total de tickets pour calculer le remplissage
     };
     
     let currentLevel = 1;
@@ -1409,10 +1414,34 @@
       }, 5000);
     }
 
+    // Fonction pour remplir le pool de drop
+    function fillDropPool(ticketsAdded) {
+      dropPool.totalTicketsForPool += ticketsAdded;
+      
+      // Calculer combien de fois nous devons remplir le pool
+      const fillCount = Math.floor(dropPool.totalTicketsForPool / dropPool.poolFillInterval);
+      
+      if (fillCount > 0) {
+        // Ajouter les pièces au pool
+        dropPool.currentPool += fillCount * dropPool.poolFillRate;
+        
+        // Réinitialiser le compteur
+        dropPool.totalTicketsForPool = dropPool.totalTicketsForPool % dropPool.poolFillInterval;
+        
+        // Afficher un message si le pool a été rempli
+        if (fillCount > 0) {
+          console.log(`Pool de drop rempli de ${fillCount * dropPool.poolFillRate} pièces!`);
+        }
+      }
+    }
+
     function checkForDrop(username, tickets) {
+      // Remplir le pool de drop en fonction des tickets ajoutés
+      fillDropPool(tickets);
+      
       // Vérifier si un drop se produit
       const dropProbability = dropPool.dropChance * tickets;
-      if (Math.random() < dropProbability) {
+      if (Math.random() < dropProbability && dropPool.currentPool > 0) {
         // Un drop se produit !
         triggerDrop(username);
       }
@@ -1438,10 +1467,25 @@
       }
       
       // Calculer le montant du drop
-      const dropAmount = Math.floor(Math.random() * (dropType.max - dropType.min + 1)) + dropType.min;
+      const maxPossibleDrop = Math.min(dropType.max, dropPool.currentPool);
+      const minPossibleDrop = Math.min(dropType.min, maxPossibleDrop);
+      
+      // Si le pool n'a pas assez de pièces pour le minimum, ajuster
+      if (dropPool.currentPool < minPossibleDrop) {
+        dropType = dropPool.dropTypes[0]; // Forcer un drop commun
+      }
+      
+      // Calculer le montant final du drop
+      const dropAmount = Math.floor(Math.random() * (maxPossibleDrop - minPossibleDrop + 1)) + minPossibleDrop;
+      
+      // S'assurer que le drop ne dépasse pas le pool actuel
+      const finalDropAmount = Math.min(dropAmount, dropPool.currentPool);
+      
+      // Retirer les pièces du pool
+      dropPool.currentPool -= finalDropAmount;
       
       // Afficher le popup de drop
-      showDropPopup(username, dropType.name, dropAmount);
+      showDropPopup(username, dropType.name, finalDropAmount);
       
       // Jouer le son de drop
       playDropSound();
@@ -1635,7 +1679,8 @@
       const gameData = {
         totalTickets: totalTickets,
         participants: participants,
-        currentLevel: currentLevel
+        currentLevel: currentLevel,
+        dropPool: dropPool
       };
       
       const dataStr = JSON.stringify(gameData, null, 2);
@@ -1671,6 +1716,10 @@
           if (importedData.currentLevel) {
             currentLevel = importedData.currentLevel;
           }
+          if (importedData.dropPool) {
+            dropPool.currentPool = importedData.dropPool.currentPool || 0;
+            dropPool.totalTicketsForPool = importedData.dropPool.totalTicketsForPool || 0;
+          }
           
           updateTicketProgress();
           updateParticipantsList();
@@ -1693,6 +1742,8 @@
       totalTickets = 0;
       participants = [];
       currentLevel = 1;
+      dropPool.currentPool = 0;
+      dropPool.totalTicketsForPool = 0;
       
       // Mettre à jour l'affichage
       updateTicketProgress();
