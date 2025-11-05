@@ -842,6 +842,11 @@
       color: #daa520;
     }
 
+    .history-type {
+      color: #ff6b6b;
+      font-weight: bold;
+    }
+
     @media (min-width: 768px) {
       .game-container {
         padding: 30px;
@@ -1451,11 +1456,24 @@
       recentHistory.forEach(entry => {
         const historyItem = document.createElement('div');
         historyItem.className = 'history-item';
-        historyItem.innerHTML = `
-          <span class="history-winner">${entry.winner}</span>
-          <span class="history-reward">${entry.reward} pièces</span>
-          <span class="history-level">Niv. ${entry.level}</span>
-        `;
+        
+        // Déterminer l'affichage selon le type d'événement
+        if (entry.type === 'drop') {
+          // Affichage pour un drop
+          historyItem.innerHTML = `
+            <span class="history-winner">${entry.winner}</span>
+            <span class="history-reward">${entry.reward} pièces</span>
+            <span class="history-type">DROP</span>
+          `;
+        } else {
+          // Affichage pour un tirage au sort
+          historyItem.innerHTML = `
+            <span class="history-winner">${entry.winner}</span>
+            <span class="history-reward">${entry.reward} pièces</span>
+            <span class="history-level">Niv. ${entry.level}</span>
+          `;
+        }
+        
         historyList.appendChild(historyItem);
       });
     }
@@ -1555,6 +1573,18 @@
       
       // Retirer les pièces du pool
       dropPool.currentPool -= finalDropAmount;
+      
+      // Ajouter le drop à l'historique
+      history.push({
+        winner: username,
+        reward: finalDropAmount,
+        type: 'drop',
+        dropType: dropType.name,
+        date: new Date().toLocaleDateString('fr-FR')
+      });
+      
+      // Mettre à jour l'historique
+      updateHistory();
       
       // Afficher le popup de drop
       showDropPopup(username, dropType.name, finalDropAmount);
@@ -1680,6 +1710,7 @@
         winner: winnerName,
         reward: currentLevelData.reward,
         level: currentLevel,
+        type: 'lottery',
         date: new Date().toLocaleDateString('fr-FR')
       });
       
