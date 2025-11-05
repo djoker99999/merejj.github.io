@@ -802,6 +802,46 @@
       background: linear-gradient(45deg, #daa520, #ffd700);
     }
 
+    .history-container {
+      margin: 15px 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 15px;
+      backdrop-filter: blur(5px);
+    }
+
+    .history-container h3 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    .history-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .history-winner {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .history-reward {
+      color: #ffd700;
+      font-weight: bold;
+    }
+
+    .history-level {
+      color: #daa520;
+    }
+
     @media (min-width: 768px) {
       .game-container {
         padding: 30px;
@@ -1000,6 +1040,13 @@
       <input type="file" id="importFileInput" accept=".json" style="display: none;">
     </div>
 
+    <div class="history-container">
+      <h3>📜 Historique des gains</h3>
+      <div class="history-list" id="historyList">
+        <!-- Les éléments d'historique seront ajoutés ici dynamiquement -->
+      </div>
+    </div>
+
     <div class="controls">
       <button id="resetBtn">Nouveau tirage</button>
     </div>
@@ -1065,6 +1112,7 @@
     let participants = [];
     let combo = 0;
     let lastHitTime = 0;
+    let history = [];
 
     // Gestion des sons
     let audioContext = null;
@@ -1096,6 +1144,7 @@
     const exportDataBtn = document.getElementById("exportDataBtn");
     const importDataBtn = document.getElementById("importDataBtn");
     const importFileInput = document.getElementById("importFileInput");
+    const historyList = document.getElementById("historyList");
     
     const victoryPopup = document.getElementById("victoryPopup");
     const popupRewardText = document.getElementById("popupRewardText");
@@ -1388,6 +1437,29 @@
       updateTicketProgress();
     }
 
+    function updateHistory() {
+      historyList.innerHTML = '';
+      
+      // Afficher les 10 derniers gains
+      const recentHistory = history.slice(-10).reverse();
+      
+      if (recentHistory.length === 0) {
+        historyList.innerHTML = '<p style="color: #aaa; text-align: center;">Aucun gain enregistré</p>';
+        return;
+      }
+      
+      recentHistory.forEach(entry => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+          <span class="history-winner">${entry.winner}</span>
+          <span class="history-reward">${entry.reward} pièces</span>
+          <span class="history-level">Niv. ${entry.level}</span>
+        `;
+        historyList.appendChild(historyItem);
+      });
+    }
+
     function showHackAnimation(isSuccess = false) {
       // Choisir une animation aléatoire
       const randomAnimation = hackAnimations[Math.floor(Math.random() * hackAnimations.length)];
@@ -1592,15 +1664,24 @@
         }
       });
       
-      // Mélanger le tableau
+      // Mélanger le tableau de manière plus robuste
       for (let i = lotteryPool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [lotteryPool[i], lotteryPool[j]] = [lotteryPool[j], lotteryPool[i]];
       }
       
-      // Tirer au sort
+      // Tirer au sort de manière équitable
       const winnerIndex = Math.floor(Math.random() * lotteryPool.length);
       const winnerName = lotteryPool[winnerIndex];
+      
+      // Enregistrer dans l'historique
+      const currentLevelData = lotteryLevels.find(level => level.id === currentLevel);
+      history.push({
+        winner: winnerName,
+        reward: currentLevelData.reward,
+        level: currentLevel,
+        date: new Date().toLocaleDateString('fr-FR')
+      });
       
       // Afficher le résultat
       showVictoryPopup(winnerName);
@@ -1618,6 +1699,7 @@
       updateTicketProgress();
       updateParticipantsList();
       updateLevelDisplay();
+      updateHistory();
     }
 
     function showVictoryPopup(winnerName) {
@@ -1680,7 +1762,8 @@
         totalTickets: totalTickets,
         participants: participants,
         currentLevel: currentLevel,
-        dropPool: dropPool
+        dropPool: dropPool,
+        history: history
       };
       
       const dataStr = JSON.stringify(gameData, null, 2);
@@ -1720,10 +1803,14 @@
             dropPool.currentPool = importedData.dropPool.currentPool || 0;
             dropPool.totalTicketsForPool = importedData.dropPool.totalTicketsForPool || 0;
           }
+          if (importedData.history) {
+            history = importedData.history;
+          }
           
           updateTicketProgress();
           updateParticipantsList();
           updateLevelDisplay();
+          updateHistory();
           
           message.textContent = "Données importées avec succès !";
         } catch (error) {
@@ -1744,11 +1831,13 @@
       currentLevel = 1;
       dropPool.currentPool = 0;
       dropPool.totalTicketsForPool = 0;
+      history = [];
       
       // Mettre à jour l'affichage
       updateTicketProgress();
       updateParticipantsList();
       updateLevelDisplay();
+      updateHistory();
       
       message.textContent = "Nouveau tirage au sort ! Achetez des tickets pour participer !";
       
@@ -1795,6 +1884,7 @@
     updateTicketProgress();
     updateParticipantsList();
     updateLevelDisplay();
+    updateHistory();
   </script>
 </body>
 </html>
