@@ -1209,7 +1209,7 @@
       updateTicketProgress();
     }
 
-    function showHackAnimation(isSuccess = false) {
+    function showHackAnimation() {
       // Choisir une animation aléatoire
       const randomAnimation = hackAnimations[Math.floor(Math.random() * hackAnimations.length)];
       hackAnimationContent.style.backgroundImage = `url('${randomAnimation}')`;
@@ -1221,19 +1221,6 @@
       hackMessage.textContent = "PIRATAGE EN COURS...";
       hackMessage.style.color = "#00ff00";
       hackMessage.style.textShadow = "0 0 20px rgba(0, 255, 0, 0.8)";
-      
-      // Après 3 secondes, afficher le message de résultat
-      setTimeout(() => {
-        if (isSuccess) {
-          hackMessage.textContent = "PIRATAGE RÉUSSI !";
-          hackMessage.style.color = "#00ff00";
-          hackMessage.style.textShadow = "0 0 20px rgba(0, 255, 0, 0.8)";
-        } else {
-          hackMessage.textContent = "ÉCHEC DU PIRATAGE";
-          hackMessage.style.color = "#ff0000";
-          hackMessage.style.textShadow = "0 0 20px rgba(255, 0, 0, 0.8)";
-        }
-      }, 3000);
       
       // Après 5 secondes, masquer l'animation
       setTimeout(() => {
@@ -1297,11 +1284,8 @@
       // Mise à jour du combo
       updateCombo();
       
-      // Vérifier si le niveau n'est pas atteint et afficher l'animation d'échec
-      const currentLevelData = lotteryLevels.find(level => level.id === currentLevel);
-      if (totalTickets < currentLevelData.ticketsNeeded) {
-        showHackAnimation(false); // Échec
-      }
+      // Afficher l'animation de piratage en cours
+      showHackAnimation();
     }
 
     function startLottery() {
@@ -1369,8 +1353,8 @@
       // Effets visuels
       createGoldShards();
       
-      // Afficher l'animation de piratage réussi
-      showHackAnimation(true);
+      // Afficher l'animation de piratage en cours
+      showHackAnimation();
     }
 
     function closeVictoryPopup() {
