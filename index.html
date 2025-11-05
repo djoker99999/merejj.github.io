@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BattleBox Team Rocket</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #0f1a2b 0%, #1a2b3c 50%, #2c3e50 100%);
+      color: #fff;
+      text-align: center;
+      min-height: 100vh;
+      padding: 10px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      overflow-x: hidden;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(10, 15, 30, 0.9);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+      position: relative;
+      border: 2px solid rgba(184, 134, 11, 0.5);
+      margin-bottom: 20px;
+    }
+
+    .game-container::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #b8860b, #daa520, #ffd700, #daa520, #b8860b);
+      border-radius: 22px;
+      z-index: -1;
+      animation: borderGlow 3s linear infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes borderGlow {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    .squirrel-logo {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 15px;
+      background-image: url('https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f43f.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+      animation: squirrelBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes squirrelBounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-5px) scale(1.05); }
+    }
+
+    .instructions {
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(184, 134, 11, 0.3);
+    }
+
+    .instructions h2 {
+      font-size: 1.4em;
+      margin-bottom: 8px;
+      background: linear-gradient(45deg, #ffd700, #daa520);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .instructions p {
+      font-size: 1em;
+      font-weight: bold;
+      color: #daa520;
+    }
+
+    .lottery-levels {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .lottery-level {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+      flex: 1;
+      min-width: 150px;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(184, 134, 11, 0.3);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .lottery-level.active {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: #ffd700;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    }
+
+    .lottery-level h3 {
+      font-size: 1.1em;
+      margin-bottom: 5px;
+      color: #ffd700;
+    }
+
+    .lottery-level p {
+      font-size: 0.9em;
+      color: #fff;
+    }
+
+    .planet-container {
+      position: relative;
+      margin: 20px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 500px;
+      perspective: 1000px;
+    }
+
+    .planet {
+      width: 400px;
+      height: 400px;
+      margin: 0 auto;
+      background-image: url('https://i.gifer.com/Mfof.gif');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      position: relative;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)) brightness(1.2) contrast(1.1);
+      z-index: 5;
+      border-radius: 50%;
+    }
+
+    .planet.hit {
+      animation: lightHit 0.4s ease-out;
+    }
+
+    .planet.heavy-hit {
+      animation: heavyHit 0.6s ease-out;
+    }
+
+    .planet.critical-hit {
+      animation: criticalHit 0.8s ease-out;
+    }
+
+    .planet.cracked {
+      filter: brightness(0.7) drop-shadow(0 0 15px rgba(255, 0, 0, 0.8));
+      animation: redPulse 1s infinite;
+    }
+
+    .planet.broken {
+      opacity: 0.3;
+      filter: grayscale(100%) brightness(0.3);
+      animation: knockout 1.5s ease-out forwards;
+    }
+
+    .ticket-modes-container {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+      margin: 15px 0;
+    }
+
+    .ticket-modes-scroll {
+      display: flex;
+      gap: 15px;
+      animation: scrollTickets 15s linear infinite;
+      padding: 10px 0;
+    }
+
+    @keyframes scrollTickets {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .ticket-modes-scroll:hover {
+      animation-play-state: paused;
+    }
+
+    .ticket-mode-image {
+      width: 140px;
+      height: 140px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .ticket-mode-image img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+    }
+
+    .ticket-mode-label {
+      font-size: 16px;
+      margin-top: 8px;
+      font-weight: bold;
+      color: #feca57;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+    }
+
+    .custom-ticket-input {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      backdrop-filter: blur(5px);
+    }
+
+    .custom-ticket-input h3 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    .custom-ticket-input input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 16px;
+      width: 100%;
+      max-width: 300px;
+      backdrop-filter: blur(5px);
+    }
+
+    .custom-ticket-input input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .hammer {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      font-size: 2.5em;
+      z-index: 10;
+      top: -30px;
+      right: -15px;
+      transform-origin: bottom center;
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .hammer.hitting {
+      animation: hammerHit 0.4s ease-out;
+    }
+
+    @keyframes hammerHit {
+      0% { transform: rotate(0deg) translateY(0); }
+      50% { transform: rotate(-45deg) translateY(15px); }
+      100% { transform: rotate(0deg) translateY(0); }
+    }
+
+    @keyframes lightHit {
+      0% { transform: translateY(0) scale(1); }
+      25% { transform: translateY(-5px) scale(0.95); }
+      50% { transform: translateY(3px) scale(1.02); }
+      75% { transform: translateY(-2px) scale(0.98); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    @keyframes heavyHit {
+      0% { transform: translateY(0) scale(1); }
+      20% { transform: translateY(-8px) scale(0.9); }
+      40% { transform: translateY(5px) scale(1.05); }
+      60% { transform: translateY(-3px) scale(0.95); }
+      80% { transform: translateY(2px) scale(1.02); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    @keyframes criticalHit {
+      0% { transform: translateY(0) scale(1); }
+      15% { transform: translateY(-12px) scale(0.85); }
+      30% { transform: translateY(8px) scale(1.1); }
+      45% { transform: translateY(-6px) scale(0.9); }
+      60% { transform: translateY(4px) scale(1.05); }
+      75% { transform: translateY(-2px) scale(0.97); }
+      90% { transform: translateY(1px) scale(1.02); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    @keyframes knockout {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      30% { transform: translateY(-10px) scale(0.9); opacity: 0.9; }
+      70% { transform: translateY(40px) scale(0.7); opacity: 0.7; }
+      100% { transform: translateY(60px) scale(0.6); opacity: 0.4; }
+    }
+
+    @keyframes redPulse {
+      0%, 100% { filter: brightness(0.7) drop-shadow(0 0 15px rgba(255, 0, 0, 0.8)); }
+      50% { filter: brightness(0.5) drop-shadow(0 0 25px rgba(255, 0, 0, 1)); }
+    }
+
+    .screen-shake {
+      animation: screenShake 0.4s ease-out;
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .impact-effect {
+      position: absolute;
+      font-size: 2em;
+      pointer-events: none;
+      z-index: 3;
+      animation: impactPop 1s ease-out forwards;
+      opacity: 0;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+    }
+
+    @keyframes impactPop {
+      0% { opacity: 0; transform: scale(0.3) translateY(0); }
+      30% { opacity: 1; transform: scale(1.5) translateY(-15px); }
+      100% { opacity: 0; transform: scale(1) translateY(-50px); }
+    }
+
+    .controls {
+      margin: 15px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 25px;
+      background: linear-gradient(45deg, #b8860b, #daa520);
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(45deg, #daa520, #ffd700);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #resetBtn {
+      background: linear-gradient(45deg, #555, #777);
+    }
+
+    #resetBtn:hover {
+      background: linear-gradient(45deg, #777, #999);
+    }
+
+    #message {
+      margin: 15px 0;
+      font-size: 1em;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      min-height: 25px;
+      color: #daa520;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .popup-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .popup-content {
+      background: linear-gradient(135deg, rgba(184, 134, 11, 0.95), rgba(218, 165, 32, 0.95));
+      padding: 25px;
+      border-radius: 20px;
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      transform: scale(0.7);
+      transition: transform 0.4s ease;
+      position: relative;
+    }
+
+    .popup-overlay.active .popup-content {
+      transform: scale(1);
+    }
+
+    .popup-content h3 {
+      font-size: 1.8em;
+      margin-bottom: 15px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .popup-reward-text {
+      font-size: 1.3em;
+      margin: 15px 0;
+      color: #fff;
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .popup-victory-message {
+      font-size: 1.4em;
+      margin: 15px 0;
+      color: #feca57;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+      font-weight: bold;
+    }
+
+    .popup-close-btn {
+      padding: 10px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(45deg, #b8860b, #daa520);
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .popup-close-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(45deg, #daa520, #ffd700);
+    }
+
+    .coins-display {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(45deg, #b8860b, #daa520);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      animation: coinPop 1s ease;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    @keyframes coinPop {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px) scale(0.5);
+      }
+      50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px) scale(1);
+      }
+    }
+
+    .combo-indicator {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: linear-gradient(45deg, #b8860b, #daa520);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9em;
+      display: none;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .ticket-progress {
+      margin: 15px 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+      backdrop-filter: blur(5px);
+    }
+
+    .ticket-progress-bar {
+      height: 20px;
+      background: linear-gradient(90deg, #4CAF50, #8BC34A);
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ticket-progress-text {
+      margin-top: 5px;
+      font-weight: bold;
+      color: #ffd700;
+    }
+
+    .participants-list {
+      margin: 15px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+      backdrop-filter: blur(5px);
+    }
+
+    .participant-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .participant-name {
+      color: #fff;
+    }
+
+    .participant-tickets {
+      color: #ffd700;
+      font-weight: bold;
+    }
+
+    .username-input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 16px;
+      width: 100%;
+      margin: 10px 0;
+      backdrop-filter: blur(5px);
+    }
+
+    .username-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .explosion {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background-image: url('https://i.gifer.com/YQDj.gif');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      pointer-events: none;
+      z-index: 6;
+      opacity: 0;
+    }
+
+    .hack-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .hack-animation.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .hack-animation-content {
+      width: 80%;
+      max-width: 500px;
+      height: 300px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      position: relative;
+    }
+
+    .hack-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3em;
+      font-weight: bold;
+      color: #00ff00;
+      text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+      opacity: 0;
+      animation: hackMessage 2s ease-out forwards;
+    }
+
+    @keyframes hackMessage {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .file-import-export {
+      margin: 15px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 15px;
+      backdrop-filter: blur(5px);
+    }
+
+    .file-import-export h3 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    @media (min-width: 768px) {
+      .game-container {
+        padding: 30px;
+        max-width: 900px;
+      }
+      
+      .planet {
+        width: 500px;
+        height: 500px;
+      }
+      
+      .hammer {
+        width: 80px;
+        height: 80px;
+        font-size: 3em;
+        top: -40px;
+        right: -20px;
+      }
+      
+      .controls {
+        flex-direction: row;
+        justify-content: center;
+      }
+      
+      button {
+        padding: 15px 30px;
+      }
+
+      .ticket-mode-image {
+        width: 160px;
+        height: 160px;
+      }
+
+      .ticket-mode-image img {
+        width: 90px;
+        height: 90px;
+      }
+
+      .file-import-export {
+        flex-direction: row;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .ticket-modes-container {
+        overflow-x: auto;
+      }
+
+      .ticket-modes-scroll {
+        animation: none;
+        gap: 8px;
+        padding: 5px;
+      }
+
+      .ticket-mode-image {
+        width: 120px;
+        height: 120px;
+      }
+
+      .ticket-mode-image img {
+        width: 60px;
+        height: 60px;
+      }
+
+      .ticket-mode-label {
+        font-size: 14px;
+      }
+
+      .planet {
+        width: 300px;
+        height: 300px;
+      }
+      
+      .lottery-levels {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container" id="gameContainer">
+    <div class="combo-indicator" id="comboIndicator">COMBO x0</div>
+
+    <div class="squirrel-logo"></div>
+    
+    <div class="lottery-levels">
+      <div class="lottery-level" id="level1">
+        <h3>Niveau 1</h3>
+        <p>300 pièces</p>
+        <p>1 000 tickets</p>
+      </div>
+      <div class="lottery-level" id="level2">
+        <h3>Niveau 2</h3>
+        <p>500 pièces</p>
+        <p>1 500 tickets</p>
+      </div>
+      <div class="lottery-level" id="level3">
+        <h3>Niveau 3</h3>
+        <p>1 000 pièces</p>
+        <p>3 000 tickets</p>
+      </div>
+      <div class="lottery-level" id="level4">
+        <h3>Niveau 4</h3>
+        <p>5 000 pièces</p>
+        <p>30 000 tickets</p>
+      </div>
+    </div>
+    
+    <div class="ticket-progress">
+      <div class="ticket-progress-bar" id="ticketProgressBar" style="width: 0%"></div>
+      <div class="ticket-progress-text" id="ticketProgressText">0 / 1 000 tickets</div>
+    </div>
+    
+    <div class="planet-container">
+      <div class="planet" id="planet"></div>
+      <div class="hammer" id="hammer">🔨</div>
+    </div>
+
+    <div class="instructions">
+      <h2>🎟️ Achetez des tickets pour le tirage au sort !</h2>
+      <p>Choisissez un niveau et accumulez des tickets pour participer au tirage !</p>
+    </div>
+
+    <div class="ticket-modes-container">
+      <div class="ticket-modes-scroll">
+        <div class="ticket-mode-image">
+          <img src="https://i.ibb.co/8DMJ0cxy/IMG-7355-Photoroom.png" alt="Donuts - 30 tickets">
+          <div class="ticket-mode-label">30 tickets</div>
+        </div>
+        <div class="ticket-mode-image">
+          <img src="https://i.ibb.co/C5M6DHcS/IMG-7356-Photoroom.png" alt="Coeurs - 100 tickets">
+          <div class="ticket-mode-label">100 tickets</div>
+        </div>
+        <div class="ticket-mode-image">
+          <img src="https://i.ibb.co/nNy17WfL/IMG-6065.png" alt="Mini Gun - 500 tickets">
+          <div class="ticket-mode-label">500 tickets</div>
+        </div>
+        <div class="ticket-mode-image">
+          <img src="https://i.ibb.co/JMPfpWV/IMG-5851.png" alt="Galaxie - 1000 tickets">
+          <div class="ticket-mode-label">1 000 tickets</div>
+        </div>
+        <!-- Dupliquer pour un défilement fluide -->
+        <div class="ticket-mode-image">
+          <img src="https://i.ibb.co/8DMJ0cxy/IMG-7355-Photoroom.png" alt="Donuts - 30 tickets">
+          <div class="ticket-mode-label">30 tickets</div>
+        </div>
+        <div class="ticket-mode-image">
+          <img src="https://i.ibb.co/C5M6DHcS/IMG-7356-Photoroom.png" alt="Coeurs - 100 tickets">
+          <div class="ticket-mode-label">100 tickets</div>
+        </div>
+        <div class="ticket-mode-image">
+          <img src="https://i.ibb.co/nNy17WfL/IMG-6065.png" alt="Mini Gun - 500 tickets">
+          <div class="ticket-mode-label">500 tickets</div>
+        </div>
+        <div class="ticket-mode-image">
+          <img src="https://i.ibb.co/JMPfpWV/IMG-5851.png" alt="Galaxie - 1000 tickets">
+          <div class="ticket-mode-label">1 000 tickets</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="custom-ticket-input">
+      <h3>Entrez votre nombre de tickets et votre nom d'utilisateur</h3>
+      <input type="number" id="customTicketAmount" placeholder="Nombre de tickets">
+      <input type="text" id="customUsername" placeholder="Votre nom d'utilisateur">
+      <button id="buyCustomTicketsBtn">Acheter ces tickets</button>
+    </div>
+
+    <div class="file-import-export">
+      <h3>Importation / Exportation des données</h3>
+      <button id="exportDataBtn">Exporter les données</button>
+      <button id="importDataBtn">Importer des données</button>
+      <input type="file" id="importFileInput" accept=".json" style="display: none;">
+    </div>
+
+    <div class="controls">
+      <button id="resetBtn">Nouveau tirage</button>
+    </div>
+
+    <div class="participants-list" id="participantsList">
+      <h3>Participants</h3>
+      <div id="participantsContainer"></div>
+    </div>
+
+    <p id="message"></p>
+  </div>
+
+  <div class="popup-overlay" id="victoryPopup">
+    <div class="popup-content">
+      <h3>🎉 Piratage réussi ! 🎉</h3>
+      <p id="popupRewardText" class="popup-reward-text"></p>
+      <div id="popupVictoryMessage" class="popup-victory-message"></div>
+      <button class="popup-close-btn" id="closePopupBtn">Continuer</button>
+    </div>
+  </div>
+
+  <div class="hack-animation" id="hackAnimation">
+    <div class="hack-animation-content" id="hackAnimationContent"></div>
+    <div class="hack-message" id="hackMessage">PIRATAGE EN COURS...</div>
+  </div>
+
+  <script>
+    // Système de tickets multi-niveaux
+    const lotteryLevels = [
+      { id: 1, reward: 300, ticketsNeeded: 1000 },
+      { id: 2, reward: 500, ticketsNeeded: 1500 },
+      { id: 3, reward: 1000, ticketsNeeded: 3000 },
+      { id: 4, reward: 5000, ticketsNeeded: 30000 }
+    ];
+    
+    let currentLevel = 1;
+    let totalTickets = 0;
+    let participants = [];
+    let combo = 0;
+    let lastHitTime = 0;
+
+    // Gestion des sons
+    let audioContext = null;
+    let hitSoundBuffer = null;
+    let rewardSoundBuffer = null;
+    let isHitSoundPlaying = false;
+    let isRewardSoundPlaying = false;
+
+    // URLs des animations de piratage
+    const hackAnimations = [
+      'https://i.gifer.com/3BBS.gif',
+      'https://i.gifer.com/3BBS.gif',
+      'https://i.gifer.com/T7Kv.gif'
+    ];
+
+    const planet = document.getElementById("planet");
+    const hammer = document.getElementById("hammer");
+    const message = document.getElementById("message");
+    const gameContainer = document.getElementById("gameContainer");
+    const comboIndicator = document.getElementById("comboIndicator");
+    const ticketProgressBar = document.getElementById("ticketProgressBar");
+    const ticketProgressText = document.getElementById("ticketProgressText");
+    const participantsContainer = document.getElementById("participantsContainer");
+    const customTicketAmount = document.getElementById("customTicketAmount");
+    const customUsername = document.getElementById("customUsername");
+    const buyCustomTicketsBtn = document.getElementById("buyCustomTicketsBtn");
+    const exportDataBtn = document.getElementById("exportDataBtn");
+    const importDataBtn = document.getElementById("importDataBtn");
+    const importFileInput = document.getElementById("importFileInput");
+    
+    const victoryPopup = document.getElementById("victoryPopup");
+    const popupRewardText = document.getElementById("popupRewardText");
+    const popupVictoryMessage = document.getElementById("popupVictoryMessage");
+    const closePopupBtn = document.getElementById("closePopupBtn");
+    
+    const hackAnimation = document.getElementById("hackAnimation");
+    const hackAnimationContent = document.getElementById("hackAnimationContent");
+    const hackMessage = document.getElementById("hackMessage");
+
+    const impactEffects = ["💥", "🔥", "⭐", "💫", "✨", "💢"];
+
+    // Initialisation de l'audio
+    function initAudio() {
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Charger les sons
+        loadSound('https://files.catbox.moe/73lkke.mp3', function(buffer) {
+          hitSoundBuffer = buffer;
+        });
+        
+        loadSound('https://files.catbox.moe/goq31j.mp3', function(buffer) {
+          rewardSoundBuffer = buffer;
+        });
+        
+      } catch (e) {
+        console.error("Erreur d'initialisation audio:", e);
+      }
+    }
+
+    // Charger un son depuis une URL
+    function loadSound(url, callback) {
+      const request = new XMLHttpRequest();
+      request.open('GET', url, true);
+      request.responseType = 'arraybuffer';
+
+      request.onload = function() {
+        if (request.status === 200) {
+          audioContext.decodeAudioData(request.response, function(buffer) {
+            callback(buffer);
+          }, function(e) {
+            console.error('Erreur de décodage audio:', e);
+          });
+        } else {
+          console.error('Erreur de chargement audio:', request.status);
+        }
+      };
+
+      request.onerror = function() {
+        console.error('Erreur réseau lors du chargement audio');
+      };
+
+      request.send();
+    }
+
+    // Jouer un son sans répétition
+    function playSound(buffer, isPlayingFlag, maxDuration = 3) {
+      if (!audioContext || !buffer || isPlayingFlag) return;
+      
+      try {
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        
+        // Créer un gain node pour contrôler le volume
+        const gainNode = audioContext.createGain();
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Limiter la durée si nécessaire
+        if (buffer.duration > maxDuration) {
+          source.start(0, 0, maxDuration);
+        } else {
+          source.start(0);
+        }
+        
+        // Marquer le son comme en cours de lecture
+        isPlayingFlag = true;
+        
+        // Réinitialiser le flag quand le son est terminé
+        source.onended = function() {
+          isPlayingFlag = false;
+        };
+      } catch (e) {
+        console.error("Erreur de lecture audio:", e);
+      }
+    }
+
+    function playHitSound() {
+      playSound(hitSoundBuffer, isHitSoundPlaying, 3); // Limité à 3 secondes
+    }
+
+    function playRewardSound() {
+      playSound(rewardSoundBuffer, isRewardSoundPlaying);
+    }
+
+    function createExplosionEffect() {
+      const explosion = document.createElement('div');
+      explosion.className = 'explosion';
+      
+      // Position aléatoire sur la planète
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 150;
+      const x = 50 + Math.cos(angle) * distance;
+      const y = 50 + Math.sin(angle) * distance;
+      
+      explosion.style.left = `${x}px`;
+      explosion.style.top = `${y}px`;
+      
+      document.querySelector('.planet-container').appendChild(explosion);
+      
+      // Animation d'explosion
+      explosion.animate([
+        {
+          opacity: 1,
+          transform: 'scale(0.5)'
+        },
+        {
+          opacity: 0.8,
+          transform: 'scale(1.2)'
+        },
+        {
+          opacity: 0,
+          transform: 'scale(1.5)'
+        }
+      ], {
+        duration: 800,
+        easing: 'ease-out'
+      }).onfinish = () => explosion.remove();
+    }
+
+    function createGoldShards() {
+      const container = planet.parentElement;
+      
+      for (let i = 0; i < 8; i++) {
+        const shard = document.createElement('div');
+        shard.style.cssText = `
+          position: absolute;
+          width: 10px;
+          height: 6px;
+          background: linear-gradient(45deg, #ffd700, #ffed4a);
+          border-radius: 2px;
+          pointer-events: none;
+          left: 50%;
+          top: 50%;
+          z-index: 1000;
+        `;
+        
+        container.appendChild(shard);
+        
+        const angle = (i / 8) * Math.PI * 2;
+        const distance = 80 + Math.random() * 80;
+        const duration = 600 + Math.random() * 400;
+        
+        shard.animate([
+          {
+            transform: 'translate(-50%, -50%) scale(1)',
+            opacity: 1
+          },
+          {
+            transform: `translate(calc(-50% + ${Math.cos(angle) * distance}px), calc(-50% + ${Math.sin(angle) * distance}px)) scale(0)`,
+            opacity: 0
+          }
+        ], {
+          duration: duration,
+          easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        }).onfinish = () => shard.remove();
+      }
+    }
+
+    function createHitParticles() {
+      const container = planet.parentElement;
+      
+      for (let i = 0; i < 4; i++) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          background: #ffd700;
+          border-radius: 50%;
+          pointer-events: none;
+          left: ${45 + Math.random() * 10}%;
+          top: ${45 + Math.random() * 10}%;
+          z-index: 999;
+        `;
+        
+        container.appendChild(particle);
+        
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 20 + Math.random() * 20;
+        
+        particle.animate([
+          {
+            transform: 'scale(1)',
+            opacity: 1
+          },
+          {
+            transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`,
+            opacity: 0
+          }
+        ], {
+          duration: 300,
+          easing: 'ease-out'
+        }).onfinish = () => particle.remove();
+      }
+    }
+
+    function createImpactEffect() {
+      const effect = document.createElement('div');
+      effect.className = 'impact-effect';
+      effect.textContent = impactEffects[Math.floor(Math.random() * impactEffects.length)];
+      effect.style.left = (Math.random() * 80 + 10) + '%';
+      effect.style.top = (Math.random() * 60 + 20) + '%';
+      
+      document.querySelector('.planet-container').appendChild(effect);
+      
+      setTimeout(() => {
+        effect.remove();
+      }, 1000);
+    }
+
+    function updateCombo() {
+      const currentTime = Date.now();
+      if (currentTime - lastHitTime > 2000) {
+        combo = 0;
+      }
+      combo++;
+      lastHitTime = currentTime;
+      
+      if (combo >= 3) {
+        comboIndicator.textContent = `COMBO x${combo}`;
+        comboIndicator.style.display = 'block';
+      }
+    }
+
+    function updateTicketProgress() {
+      const currentLevelData = lotteryLevels.find(level => level.id === currentLevel);
+      const percentage = (totalTickets / currentLevelData.ticketsNeeded) * 100;
+      ticketProgressBar.style.width = Math.min(percentage, 100) + '%';
+      ticketProgressText.textContent = `${totalTickets.toLocaleString()} / ${currentLevelData.ticketsNeeded.toLocaleString()} tickets`;
+      
+      if (totalTickets >= currentLevelData.ticketsNeeded) {
+        startLottery();
+      }
+    }
+
+    function updateParticipantsList() {
+      participantsContainer.innerHTML = '';
+      
+      // Trier les participants par nombre de tickets (décroissant)
+      participants.sort((a, b) => b.tickets - a.tickets);
+      
+      participants.forEach(participant => {
+        const participantItem = document.createElement('div');
+        participantItem.className = 'participant-item';
+        participantItem.innerHTML = `
+          <span class="participant-name">${participant.name}</span>
+          <span class="participant-tickets">${participant.tickets} tickets</span>
+        `;
+        participantsContainer.appendChild(participantItem);
+      });
+    }
+
+    function updateLevelDisplay() {
+      // Mettre à jour l'affichage des niveaux
+      document.querySelectorAll('.lottery-level').forEach((levelEl, index) => {
+        const levelId = index + 1;
+        if (levelId === currentLevel) {
+          levelEl.classList.add('active');
+        } else {
+          levelEl.classList.remove('active');
+        }
+      });
+      
+      // Mettre à jour la barre de progression
+      updateTicketProgress();
+    }
+
+    function showHackAnimation(isSuccess = false) {
+      // Choisir une animation aléatoire
+      const randomAnimation = hackAnimations[Math.floor(Math.random() * hackAnimations.length)];
+      hackAnimationContent.style.backgroundImage = `url('${randomAnimation}')`;
+      
+      // Afficher l'animation
+      hackAnimation.classList.add('active');
+      
+      // Afficher le message de piratage en cours
+      hackMessage.textContent = "PIRATAGE EN COURS...";
+      hackMessage.style.color = "#00ff00";
+      hackMessage.style.textShadow = "0 0 20px rgba(0, 255, 0, 0.8)";
+      
+      // Après 3 secondes, afficher le message de résultat
+      setTimeout(() => {
+        if (isSuccess) {
+          hackMessage.textContent = "PIRATAGE RÉUSSI !";
+          hackMessage.style.color = "#00ff00";
+          hackMessage.style.textShadow = "0 0 20px rgba(0, 255, 0, 0.8)";
+        } else {
+          hackMessage.textContent = "ÉCHEC DU PIRATAGE";
+          hackMessage.style.color = "#ff0000";
+          hackMessage.style.textShadow = "0 0 20px rgba(255, 0, 0, 0.8)";
+        }
+      }, 3000);
+      
+      // Après 5 secondes, masquer l'animation
+      setTimeout(() => {
+        hackAnimation.classList.remove('active');
+      }, 5000);
+    }
+
+    function addTickets(username, tickets) {
+      // Vérifier si l'utilisateur existe déjà
+      const existingUserIndex = participants.findIndex(p => p.name.toLowerCase() === username.toLowerCase());
+      
+      if (existingUserIndex !== -1) {
+        // Mettre à jour le nombre de tickets de l'utilisateur existant
+        participants[existingUserIndex].tickets += tickets;
+      } else {
+        // Ajouter un nouvel utilisateur
+        participants.push({
+          name: username,
+          tickets: tickets
+        });
+      }
+      
+      // Mettre à jour le total de tickets
+      totalTickets += tickets;
+      
+      // Mettre à jour l'affichage
+      updateTicketProgress();
+      updateParticipantsList();
+      
+      // Afficher un message de confirmation
+      message.textContent = `🎟️ ${username} a acheté ${tickets} ticket(s) !`;
+      
+      // Effets visuels
+      playHitSound();
+      hammer.classList.add('hitting');
+      
+      // Animation de la planète selon le nombre de tickets
+      let animationType = 'hit';
+      if (tickets <= 10) {
+        animationType = 'hit';
+      } else if (tickets <= 30) {
+        animationType = 'heavy-hit';
+      } else {
+        animationType = 'critical-hit';
+      }
+      
+      planet.classList.add(animationType);
+      
+      // Créer une explosion sur la planète
+      createExplosionEffect();
+      
+      setTimeout(() => {
+        hammer.classList.remove('hitting');
+        planet.classList.remove(animationType);
+      }, 400);
+      
+      // Effets de particules
+      createHitParticles();
+      createImpactEffect();
+      
+      // Mise à jour du combo
+      updateCombo();
+      
+      // Vérifier si le niveau n'est pas atteint et afficher l'animation d'échec
+      const currentLevelData = lotteryLevels.find(level => level.id === currentLevel);
+      if (totalTickets < currentLevelData.ticketsNeeded) {
+        showHackAnimation(false); // Échec
+      }
+    }
+
+    function startLottery() {
+      if (participants.length === 0) {
+        message.textContent = "Aucun participant pour le tirage au sort !";
+        return;
+      }
+      
+      // Créer un tableau avec toutes les chances (chaque ticket = une chance)
+      const lotteryPool = [];
+      participants.forEach(participant => {
+        for (let i = 0; i < participant.tickets; i++) {
+          lotteryPool.push(participant.name);
+        }
+      });
+      
+      // Mélanger le tableau
+      for (let i = lotteryPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [lotteryPool[i], lotteryPool[j]] = [lotteryPool[j], lotteryPool[i]];
+      }
+      
+      // Tirer au sort
+      const winnerIndex = Math.floor(Math.random() * lotteryPool.length);
+      const winnerName = lotteryPool[winnerIndex];
+      
+      // Afficher le résultat
+      showVictoryPopup(winnerName);
+      
+      // Passer au niveau suivant ou recommencer
+      if (currentLevel < lotteryLevels.length) {
+        currentLevel++;
+      } else {
+        currentLevel = 1;
+      }
+      
+      // Réinitialiser le système de tickets
+      totalTickets = 0;
+      participants = [];
+      updateTicketProgress();
+      updateParticipantsList();
+      updateLevelDisplay();
+    }
+
+    function showVictoryPopup(winnerName) {
+      const currentLevelData = lotteryLevels.find(level => level.id === currentLevel);
+      const rewardText = `${currentLevelData.reward.toLocaleString()} pièces !`;
+      const victoryText = `Félicitations ${winnerName} ! Piratage réussi !`;
+      
+      popupRewardText.innerHTML = `
+        <strong>RÉCOMPENSE :</strong><br>
+        ${rewardText}
+      `;
+      
+      popupVictoryMessage.textContent = victoryText;
+      
+      victoryPopup.style.display = 'flex';
+      setTimeout(() => {
+        victoryPopup.classList.add('active');
+      }, 10);
+      
+      // Jouer le son de récompense
+      playRewardSound();
+      
+      // Effets visuels
+      createGoldShards();
+      
+      // Afficher l'animation de piratage réussi
+      showHackAnimation(true);
+    }
+
+    function closeVictoryPopup() {
+      victoryPopup.classList.remove('active');
+      setTimeout(() => {
+        victoryPopup.style.display = 'none';
+      }, 300);
+    }
+
+    function buyCustomTickets() {
+      const ticketAmount = parseInt(customTicketAmount.value);
+      const username = customUsername.value.trim();
+      
+      if (!username) {
+        alert('Veuillez entrer un nom d\'utilisateur');
+        return;
+      }
+      
+      if (isNaN(ticketAmount) || ticketAmount <= 0) {
+        alert('Veuillez entrer un nombre valide de tickets');
+        return;
+      }
+      
+      addTickets(username, ticketAmount);
+      
+      // Réinitialiser les champs
+      customTicketAmount.value = '';
+      customUsername.value = '';
+    }
+
+    function exportGameData() {
+      const gameData = {
+        totalTickets: totalTickets,
+        participants: participants,
+        currentLevel: currentLevel
+      };
+      
+      const dataStr = JSON.stringify(gameData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'battlebox_data.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      message.textContent = "Données exportées avec succès !";
+    }
+
+    function importGameData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          
+          if (importedData.totalTickets !== undefined) {
+            totalTickets = importedData.totalTickets;
+          }
+          if (importedData.participants) {
+            participants = importedData.participants;
+          }
+          if (importedData.currentLevel) {
+            currentLevel = importedData.currentLevel;
+          }
+          
+          updateTicketProgress();
+          updateParticipantsList();
+          updateLevelDisplay();
+          
+          message.textContent = "Données importées avec succès !";
+        } catch (error) {
+          alert("Erreur lors de l'importation des données : fichier invalide");
+          console.error(error);
+        }
+      };
+      reader.readAsText(file);
+      
+      // Réinitialiser l'input file
+      event.target.value = '';
+    }
+
+    function initGame() {
+      // Réinitialiser les données
+      totalTickets = 0;
+      participants = [];
+      currentLevel = 1;
+      
+      // Mettre à jour l'affichage
+      updateTicketProgress();
+      updateParticipantsList();
+      updateLevelDisplay();
+      
+      message.textContent = "Nouveau tirage au sort ! Achetez des tickets pour participer !";
+      
+      closeVictoryPopup();
+      comboIndicator.style.display = "none";
+    }
+
+    // Initialisation des événements
+    document.getElementById("resetBtn").addEventListener("click", initGame);
+    buyCustomTicketsBtn.addEventListener('click', buyCustomTickets);
+    exportDataBtn.addEventListener('click', exportGameData);
+    importDataBtn.addEventListener('click', () => importFileInput.click());
+    importFileInput.addEventListener('change', importGameData);
+
+    // Ajouter des événements pour changer de niveau
+    document.querySelectorAll('.lottery-level').forEach((levelEl, index) => {
+      levelEl.addEventListener('click', () => {
+        currentLevel = index + 1;
+        updateLevelDisplay();
+      });
+    });
+
+    closePopupBtn.addEventListener('click', closeVictoryPopup);
+
+    victoryPopup.addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeVictoryPopup();
+      }
+    });
+
+    // Initialisation du jeu
+    initGame();
+
+    // Initialiser l'audio et démarrer le jeu
+    initAudio();
+    updateTicketProgress();
+    updateParticipantsList();
+    updateLevelDisplay();
+  </script>
+</body>
+</html>
