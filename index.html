@@ -1209,7 +1209,7 @@
       updateTicketProgress();
     }
 
-    function showHackAnimation() {
+    function showHackAnimation(isSuccess = false) {
       // Choisir une animation aléatoire
       const randomAnimation = hackAnimations[Math.floor(Math.random() * hackAnimations.length)];
       hackAnimationContent.style.backgroundImage = `url('${randomAnimation}')`;
@@ -1217,10 +1217,17 @@
       // Afficher l'animation
       hackAnimation.classList.add('active');
       
-      // Afficher le message de piratage en cours
-      hackMessage.textContent = "PIRATAGE EN COURS...";
-      hackMessage.style.color = "#00ff00";
-      hackMessage.style.textShadow = "0 0 20px rgba(0, 255, 0, 0.8)";
+      if (isSuccess) {
+        // Afficher le message de piratage réussi
+        hackMessage.textContent = "PIRATAGE RÉUSSI !";
+        hackMessage.style.color = "#00ff00";
+        hackMessage.style.textShadow = "0 0 20px rgba(0, 255, 0, 0.8)";
+      } else {
+        // Afficher le message de piratage en cours
+        hackMessage.textContent = "PIRATAGE EN COURS...";
+        hackMessage.style.color = "#00ff00";
+        hackMessage.style.textShadow = "0 0 20px rgba(0, 255, 0, 0.8)";
+      }
       
       // Après 5 secondes, masquer l'animation
       setTimeout(() => {
@@ -1284,8 +1291,11 @@
       // Mise à jour du combo
       updateCombo();
       
-      // Afficher l'animation de piratage en cours
-      showHackAnimation();
+      // Afficher l'animation de piratage en cours (pas de réussite)
+      const currentLevelData = lotteryLevels.find(level => level.id === currentLevel);
+      if (totalTickets < currentLevelData.ticketsNeeded) {
+        showHackAnimation(false); // Piratage en cours
+      }
     }
 
     function startLottery() {
@@ -1353,8 +1363,8 @@
       // Effets visuels
       createGoldShards();
       
-      // Afficher l'animation de piratage en cours
-      showHackAnimation();
+      // Afficher l'animation de piratage réussi
+      showHackAnimation(true);
     }
 
     function closeVictoryPopup() {
